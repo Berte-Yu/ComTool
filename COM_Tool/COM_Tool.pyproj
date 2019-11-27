@@ -21,6 +21,9 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="com.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="Main.py" />
     <Compile Include="Main_form.py" />
   </ItemGroup>
