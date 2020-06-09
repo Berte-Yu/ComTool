@@ -13,19 +13,29 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         self.setupUi(self)
         
         self.ComTool_status = {
-            # 串口的链接状态
-            'isConnect' : False,
-            'dev_status': False,
-            # 当前选中的串口列表名字
-            'dev_name' : '',
-            # 波特率
-            'baud_rate' : '115200',
-            # 数据位
-            'data_bits' : '8',
-            # 奇偶校验位
-            'parity'    : 'None',
-            # 停止位
-            'stop_bits' : '1',
+                # 串口的链接状态
+                'isConnect' : False,
+                'dev_status': False,
+                # 当前选中的串口列表名字
+                'dev_name' : '',
+                # 波特率
+                'baud_rate' : '115200',
+                # 数据位
+                'data_bits' : '8',
+                # 奇偶校验位
+                'parity'    : 'None',
+                # 停止位
+                'stop_bits' : '1',
+                # 接收格式
+                'recv_format': 'ASCII',
+                # 发送格式
+                'send_format' : 'ASCII',
+                # 接收区缓存大小
+                'recv_buff_size' : '200K',
+                # 是否将接收的数据保存到文件
+                'is_recv_save_2_file' : False,
+                # 接收显示区的编码格式
+                'encoding_format' : 'UTF-8',
             }
 
         self.com_dev = com.com()
@@ -38,11 +48,22 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         # 将此定时器的超时连接到扫描端口方法上
         self.scan_uart_timer.timeout.connect(self.scan_uart)
         # 设置定时器的间隔时间并启动定时器
-        self.scan_uart_timer.start(500) 
+        self.scan_uart_timer.start(500)
 
         # 连接槽函数
         self.pushButton_connect.clicked.connect(self.connecthandle)
-    
+        
+        # 设置默认的接收和发送的格式
+        if self.ComTool_status['recv_format'] == 'ASCII':
+            self.radioButton_rev_ascii.setChecked(True)
+        else:
+            self.radioButton_rev_hex.setChecked(True)
+
+        if self.ComTool_status['send_format'] == 'ASCII':
+            self.radioButton_send_ascii.setChecked(True)
+        else:
+            self.radioButton_send_hex.setChecked(True)
+
     def _set_def_com_status(self):
         # 设置默认的串口状态
         self.comboBox_baud_rate.setCurrentText(self.ComTool_status['baud_rate'])
