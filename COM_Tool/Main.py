@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from PyQt5 import QtWidgets, QtCore
 from PyQt5.QtGui import QColor
 import sys
@@ -12,6 +13,22 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         super(Main_form_UI, self).__init__(parent)
         self.setupUi(self)
         
+        self._init_param()
+        self._init_event()
+
+    def _init_event(self):
+        # 初始化各个控件的信号和槽
+         # 将此定时器的超时连接到扫描端口方法上
+        self.scan_uart_timer.timeout.connect(self.scan_uart)
+        # 设置定时器的间隔时间并启动定时器
+        self.scan_uart_timer.start(500)
+
+        # 连接按钮的槽函数
+        self.pushButton_connect.clicked.connect(self.connecthandle)
+        
+
+    def _init_param(self):
+        # 初始化参数
         self.ComTool_status = {
                 # 串口的链接状态
                 'isConnect' : False,
@@ -45,14 +62,7 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
 
         # 初始化一个定时器
         self.scan_uart_timer = QTimer()
-        # 将此定时器的超时连接到扫描端口方法上
-        self.scan_uart_timer.timeout.connect(self.scan_uart)
-        # 设置定时器的间隔时间并启动定时器
-        self.scan_uart_timer.start(500)
 
-        # 连接槽函数
-        self.pushButton_connect.clicked.connect(self.connecthandle)
-        
         # 设置默认的接收和发送的格式
         if self.ComTool_status['recv_format'] == 'ASCII':
             self.radioButton_rev_ascii.setChecked(True)
@@ -63,6 +73,7 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
             self.radioButton_send_ascii.setChecked(True)
         else:
             self.radioButton_send_hex.setChecked(True)
+        
 
     def _set_def_com_status(self):
         # 设置默认的串口状态
