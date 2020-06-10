@@ -1,7 +1,11 @@
 import threading
-class thread():
+class Runthread():
+    '''
+    定义一个线程类，实现了线程的阻塞和释放以及线程停止
+    适用于一直循环的线程
+    '''
     def __init__(self, run_func):
-        self.thread = threading.thread(target=self.run)
+        self.thread = threading.Thread(target=self.run)
         self.__flag = threading.Event()         # 用于暂停线程的标识
         self.__flag.set()                       # 设置为True
         self.__running = threading.Event()      # 用于停止线程的标识
@@ -30,13 +34,23 @@ class thread():
 if __name__ == "__main__":
     import time
     def run1():
-        time().sleep(1)
         print("run1 sleep 1s.")
+        time.sleep(1)
 
-    t1 = thread(run1)
+    t1 = Runthread(run1)
     t1.start()
-    time().sleep(8)
+    time.sleep(8)
     t1.pause()
     print("阻塞了")
-    time().sleep(10)
-    t1.resume("解除了")
+    time.sleep(10)
+    t1.resume()
+    print("解除了")
+    time.sleep(10)
+    t1.stop()
+    print("停止了")
+    time.sleep(10)
+    t1 = Runthread(run1)
+    t1.start()
+    time.sleep(10)
+
+    print("程序退出")

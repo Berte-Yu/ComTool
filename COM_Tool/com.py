@@ -14,7 +14,6 @@ class com(object):
 
         # 定义发送队列
         self.tx_queue = Queue()
-        pass
 
     def com_scan(self):
         # 扫描端口并返回端口
@@ -29,8 +28,8 @@ class com(object):
             _parity = serial.serialutil.PARITY_ODD
         elif _parity == 'Even':
             _parity = serial.serialutil.PARITY_EVEN
-        self.dev = serial.Serial(port=_port, baudrate=_baudrate, bytesize=_bytesize, parity=_parity, stopbits=_stopbits)
-
+        self.dev = serial.Serial(port=_port, baudrate=_baudrate, bytesize=_bytesize, parity=_parity, stopbits=_stopbits, timeout=0.5)
+        
     def close(self):
         self.dev.close()
         self.dev = None
@@ -46,10 +45,17 @@ class com(object):
                 self.dev.write(self.tx_queue.get_nowait())
             except:
                 return
+        else:
+            time.sleep(0.05)
 
     def com_rxHandler(self):
+        read_num = self.dev.in_waiting()
+        if read_num == 0:
+            time.sleep(0.05)
+            return
+
         try:
-            read_data = self.dev.read()
+            read_data = self.dev.read(read_num)
         except:
             return
         

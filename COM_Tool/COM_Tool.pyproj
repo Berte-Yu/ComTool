@@ -4,7 +4,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>dce46d95-5c9f-4016-bb20-6025e67a16ce</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>thread.py</StartupFile>
+    <StartupFile>Main.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
@@ -24,11 +24,17 @@
     <Compile Include="com.py">
       <SubType>Code</SubType>
     </Compile>
-    <Compile Include="Main.py" />
-    <Compile Include="Main_form.py" />
-    <Compile Include="thread.py">
+    <Compile Include="Hex_string.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="Main.py" />
+    <Compile Include="Main_form.py" />
+    <Compile Include="Runthread.py">
+      <SubType>Code</SubType>
+    </Compile>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="data\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

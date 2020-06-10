@@ -7,6 +7,10 @@ import serial
 import serial.tools.list_ports
 from PyQt5.QtCore import QTimer
 import com
+import Runthread
+import Hex_string
+import os
+import time
 
 class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -32,7 +36,6 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         self.ComTool_status = {
                 # 串口的链接状态
                 'isConnect' : False,
-                'dev_status': False,
                 # 当前选中的串口列表名字
                 'dev_name' : '',
                 # 波特率
@@ -56,6 +59,7 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
             }
 
         self.com_dev = com.com()
+
         self.com_dev_list = []
 
         self._set_def_com_status()
@@ -74,6 +78,9 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         else:
             self.radioButton_send_hex.setChecked(True)
         
+
+        # 实例化一个字符转换类
+        hex_handler = Hex_string.Hex_string()
 
     def _set_def_com_status(self):
         # 设置默认的串口状态
@@ -116,18 +123,14 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
             self.comboBox_Port.addItems(pc_com_name_list)
             
     def connecthandle(self):
-        # 点击按键后的操作
-        
-        # 更改链接状态
-        self.ComTool_status['isConnect'] = not self.ComTool_status['isConnect']
+        # 点击连接按键后的操作
 
-        if self.ComTool_status['isConnect'] is True:
+        if self.ComTool_status['isConnect'] is False:
             # 获取状态
             self._get_current_com_status()
             
             if self.ComTool_status['dev_name'] == '':
                 # 当前没有选中任何设备，直接弹窗报错
-                self.ComTool_status['isConnect'] = False
                 QtWidgets.QMessageBox.warning(self,'串口设备选择错误', '串口设备没有插入。', QtWidgets.QMessageBox.Ok)
                 return
 
@@ -139,11 +142,9 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
                               self.ComTool_status['parity'],
                               int(self.ComTool_status['stop_bits']))
             except:
-                self.ComTool_status['isConnect'] = False
                 QtWidgets.QMessageBox.warning(self,'串口设备错误', '串口设备被占用。', QtWidgets.QMessageBox.Ok)
                 return
 
-            self.ComTool_status['dev_status'] = True
             
             # 停止串口扫描的定时器
             self.scan_uart_timer.stop()
@@ -151,15 +152,58 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
             # 改变连接按键的显示文本
             self.pushButton_connect.setText('断开')
 
+            # 设置连接状态
+            self.ComTool_status['isConnect'] = True
+
+            # 创建串口接收和发送的线程
+            self.thread_rx = Runthread.Runthread(self.com_dev.com_rxHandler)
+            self.thread_tx = Runthread.Runthread(self.com_dev.com_txHandler)
+            self.thread_display = Runthread.Runthread(self.rxDataHandler)
+            self.thread_rx.start()
+            self.thread_rx.start()
+            self.thread_display.start()
+
         else:
+            self.thread_rx.stop()
+            self.thread_rx.stop()
+            self.thread_display.stop()
+
+            # 关闭串口
+            self.com_dev.close()
+
             # 设置定时器的间隔时间并启动定时器
             self.scan_uart_timer.start(500) 
             self.pushButton_connect.setText('连接')
             
-            # 关闭串口
-            if self.ComTool_status['dev_status'] == True:
-                self.ComTool_status['dev_status'] = False
-                self.com_dev.close()
+            # 设置连接状态
+            self.ComTool_status['isConnect'] = False
+
+    def rxDataHandler(self):
+        # 从接收缓存中获取数据进行处理
+        rx_data = []
+
+        # 从接收缓存中读空数据
+        while not self.com_dev.rx_queue.empty:
+            rx_data.append(self.com_dev.rx_queue.get_nowait())
+        
+        if len(rx_data) != 0:
+            if self.radioButton_rev_hex.isChecked:
+                # 将接收到的数据按照hex格式显示
+                hex_rx_data = Hex_string.hex_handler.byte_to_hexString(rx_data)
+
+                # 将字符串追加到显示区
+                for str in hex_rx_data:
+                    self.textBrowser_rev.append(str+' ')
+                    self.textBrowser_rev.moveCursor(self.textBrowser_rev.textCursor().End)
+            else:
+                # 将接收的数据以ascii字符串的形式保存
+                if self.comboBox_encode.currentText() == 'UTF-8':
+                    utf8_rx_data = Hex_string.hex_handler.byte_to_utf8str(rx_data)
+                    self.textBrowser_rev.append(utf8_rx_data)
+                    self.textBrowser_rev.moveCursor(self.textBrowser_rev.textCursor().End)
+
+        else:
+            time.sleep(0.08)
 
 def mywindow():
     mywindow = Main_form_UI()
