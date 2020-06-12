@@ -1,10 +1,18 @@
 import threading
-class Runthread():
+from PyQt5.QtCore import QObject,pyqtSignal
+
+class Runthread(QObject):
     '''
     定义一个线程类，实现了线程的阻塞和释放以及线程停止
     适用于一直循环的线程
     '''
+
+    #定义一个信号
+    sendmsg = pyqtSignal(object)
+
     def __init__(self, run_func):
+        super(Runthread, self).__init__()
+
         self.thread = threading.Thread(target=self.run)
         self.__flag = threading.Event()         # 用于暂停线程的标识
         self.__flag.set()                       # 设置为True
@@ -18,7 +26,7 @@ class Runthread():
     def run(self):
         while self.__running.isSet():
             self.__flag.wait()      # 为True时立即返回, 为False时阻塞直到内部的标识位为True后返回
-            self.__run_func()
+            self.__run_func(sendmsg=self.sendmsg)
 
     def pause(self):
         self.__flag.clear()         # 设置为False, 让线程阻塞

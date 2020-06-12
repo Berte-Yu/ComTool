@@ -2,6 +2,7 @@ import serial
 import serial.tools.list_ports
 import serial.serialutil
 from queue import Queue
+import time
 
 class com(object):
     """串口操作的封装"""
@@ -34,7 +35,7 @@ class com(object):
         self.dev.close()
         self.dev = None
 
-    def com_txHandler(self):
+    def com_txHandler(self,sendmsg=None):
 
         # 由线程去调用，判断队列里是否有值并发送或者接收到队列里
         if self.dev == None:
@@ -48,8 +49,8 @@ class com(object):
         else:
             time.sleep(0.05)
 
-    def com_rxHandler(self):
-        read_num = self.dev.in_waiting()
+    def com_rxHandler(self,sendmsg=None):
+        read_num = self.dev.in_waiting
         if read_num == 0:
             time.sleep(0.05)
             return

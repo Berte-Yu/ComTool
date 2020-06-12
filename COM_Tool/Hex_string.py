@@ -2,14 +2,17 @@ class Hex_string():
     def byte_to_hexString(self, byte):
         ''' 
         将byte列表转化为HEX型字符串列表:
-        b'haha' --> ['68', '61', '68', '61']
+        [b'haha',b'nihao'] --> ['68', '61', '68', '61']
         '''
         hexString = []
         if len(byte) == 0:
             return hexString
         
         for b in byte:
-            hexString.append("%02X" % b) 
+            s = b.hex()
+            for i in range(len(s)):
+                if i%2 == 0:
+                    hexString.append((s[i]+s[i+1]).upper())
 
         return hexString
 

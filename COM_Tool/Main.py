@@ -30,6 +30,8 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         # 连接按钮的槽函数
         self.pushButton_connect.clicked.connect(self.connecthandle)
         
+        # 发送按钮的槽函数
+        self.pushButton_send.clicked.connect(self.sendButtonHandle)
 
     def _init_param(self):
         # 初始化参数
@@ -80,7 +82,7 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         
 
         # 实例化一个字符转换类
-        hex_handler = Hex_string.Hex_string()
+        self.hex_handler = Hex_string.Hex_string()
 
     def _set_def_com_status(self):
         # 设置默认的串口状态
@@ -158,15 +160,17 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
             # 创建串口接收和发送的线程
             self.thread_rx = Runthread.Runthread(self.com_dev.com_rxHandler)
             self.thread_tx = Runthread.Runthread(self.com_dev.com_txHandler)
-            self.thread_display = Runthread.Runthread(self.rxDataHandler)
+            self.thread_rxData = Runthread.Runthread(self.rxDataHandler)
+            self.thread_rxData.sendmsg.connect(self.display) # 将接收数据处理的线程信号连接到此处
             self.thread_rx.start()
-            self.thread_rx.start()
-            self.thread_display.start()
+            self.thread_tx.start()
+            self.thread_rxData.start()
 
         else:
             self.thread_rx.stop()
             self.thread_rx.stop()
-            self.thread_display.stop()
+            self.thread_rxData.stop()
+            self.thread_rxData.sendmsg.disconnect(self.display)
 
             # 关闭串口
             self.com_dev.close()
@@ -178,32 +182,43 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
             # 设置连接状态
             self.ComTool_status['isConnect'] = False
 
-    def rxDataHandler(self):
+    def sendButtonHandle(self):
+        # 获取发送区的内容
+        sendtext = self.textEdit_send.toPlainText()
+
+        
+
+    def rxDataHandler(self,sendmsg = None):
         # 从接收缓存中获取数据进行处理
         rx_data = []
 
         # 从接收缓存中读空数据
-        while not self.com_dev.rx_queue.empty:
+        while not self.com_dev.rx_queue.empty():
             rx_data.append(self.com_dev.rx_queue.get_nowait())
         
         if len(rx_data) != 0:
-            if self.radioButton_rev_hex.isChecked:
+            if self.radioButton_rev_hex.isChecked():
+                display_str = ''
                 # 将接收到的数据按照hex格式显示
-                hex_rx_data = Hex_string.hex_handler.byte_to_hexString(rx_data)
+                hex_rx_data = self.hex_handler.byte_to_hexString(rx_data)
 
                 # 将字符串追加到显示区
                 for str in hex_rx_data:
-                    self.textBrowser_rev.append(str+' ')
-                    self.textBrowser_rev.moveCursor(self.textBrowser_rev.textCursor().End)
+                    display_str += str+' '
+
+                sendmsg.emit(display_str) # 将数据发送到显示函数中进行显示
             else:
                 # 将接收的数据以ascii字符串的形式保存
                 if self.comboBox_encode.currentText() == 'UTF-8':
-                    utf8_rx_data = Hex_string.hex_handler.byte_to_utf8str(rx_data)
-                    self.textBrowser_rev.append(utf8_rx_data)
-                    self.textBrowser_rev.moveCursor(self.textBrowser_rev.textCursor().End)
+                    utf8_rx_data = self.hex_handler.byte_to_utf8str(rx_data)
+                    sendmsg.emit(utf8_rx_data) # 将数据发送到显示函数中进行显示
 
         else:
             time.sleep(0.08)
+
+    def display(self, msg):
+        self.plainTextEdit_rev.insertPlainText(msg)
+        self.plainTextEdit_rev.moveCursor(self.plainTextEdit_rev.textCursor().End)
 
 def mywindow():
     mywindow = Main_form_UI()
