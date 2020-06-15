@@ -11,6 +11,7 @@ import Runthread
 import Hex_string
 import os
 import time
+import json
 
 class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -60,6 +61,9 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
                 'encoding_format' : 'UTF-8',
             }
 
+        # 加载配置文件的路径
+        self.param_file_path = os.path.join(os.path.abspath('.'), 'data', 'param.dat')
+
         self.com_dev = com.com()
 
         self.com_dev_list = []
@@ -68,6 +72,8 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
 
         # 初始化一个定时器
         self.scan_uart_timer = QTimer()
+
+        self.__load_param_file()    
 
         # 设置默认的接收和发送的格式
         if self.ComTool_status['recv_format'] == 'ASCII':
@@ -83,6 +89,21 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
 
         # 实例化一个字符转换类
         self.hex_handler = Hex_string.Hex_string()
+
+        self.plainTextEdit_rev.document()
+
+    def __load_param_file(self):
+        # 加载参数文件
+        if not os.path.exists(self.param_file_path):
+            #没有参数文件
+            with open(self.param_file_path,'w',encoding='utf-8') as f:
+                # 将默认参数导入文件
+                f.write(json.dumps(self.ComTool_status, indent=4)) 
+                f.close()
+        with open(self.param_file_path,'r',encoding='utf-8') as f:
+            self.ComTool_status = json.loads(f.read(), encoding='utf-8')
+            f.close()
+        pass
 
     def _set_def_com_status(self):
         # 设置默认的串口状态
@@ -168,7 +189,7 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
 
         else:
             self.thread_rx.stop()
-            self.thread_rx.stop()
+            self.thread_tx.stop()
             self.thread_rxData.stop()
             self.thread_rxData.sendmsg.disconnect(self.display)
 
@@ -185,6 +206,12 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
     def sendButtonHandle(self):
         # 获取发送区的内容
         sendtext = self.textEdit_send.toPlainText()
+
+        if len(sendtext) != 0:
+            if self.radioButton_send_ascii.isChecked():
+                if self.comboBox_encode.currentText() == 'UTF-8':
+                    self.com_dev.write(sendtext.encode(encoding='utf-8'))
+        pass
 
         
 
@@ -219,6 +246,16 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
     def display(self, msg):
         self.plainTextEdit_rev.insertPlainText(msg)
         self.plainTextEdit_rev.moveCursor(self.plainTextEdit_rev.textCursor().End)
+
+    def closeEvent(self, cls):
+        # 正常退出事件
+        if self.ComTool_status['isConnect'] is True:
+            self.connecthandle()
+
+        with open(self.param_file_path,'w',encoding='utf-8') as f:
+            f.write(json.dumps(self.ComTool_status, indent=4)) 
+            f.close()
+        return super().closeEvent(cls)
 
 def mywindow():
     mywindow = Main_form_UI()
