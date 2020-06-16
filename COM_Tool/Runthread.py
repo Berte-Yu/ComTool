@@ -10,10 +10,10 @@ class Runthread(QObject):
     #定义一个信号
     sendmsg = pyqtSignal(object)
 
-    def __init__(self, run_func):
+    def __init__(self, run_func, name=None):
         super(Runthread, self).__init__()
 
-        self.thread = threading.Thread(target=self.run)
+        self.thread = threading.Thread(target=self.run, name=name)
         self.__flag = threading.Event()         # 用于暂停线程的标识
         self.__flag.set()                       # 设置为True
         self.__running = threading.Event()      # 用于停止线程的标识
@@ -38,6 +38,8 @@ class Runthread(QObject):
         self.__running.clear()      # 设置为False
         self.__flag.set()           # 将线程从暂停状态恢复, 如何已经暂停的话
         
+    def join(self):
+        self.thread.join()
 
 if __name__ == "__main__":
     import time

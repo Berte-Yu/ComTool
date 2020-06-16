@@ -1,13 +1,13 @@
 {
     "isConnect": false,
     "dev_name": "COM14",
-    "baud_rate": "115200",
+    "baud_rate": "19200",
     "data_bits": "8",
     "parity": "None",
     "stop_bits": "1",
     "recv_format": "ASCII",
     "send_format": "ASCII",
-    "recv_buff_size": "200K",
+    "recv_buff_size": "500",
     "is_recv_save_2_file": false,
     "encoding_format": "UTF-8"
 }

@@ -350,7 +350,7 @@
       <item row="1" column="0">
        <widget class="QLabel" name="label_6">
         <property name="text">
-         <string>缓存大小</string>
+         <string>接收区行数</string>
         </property>
        </widget>
       </item>
@@ -358,27 +358,32 @@
        <widget class="QComboBox" name="comboBox_rev_buff_size">
         <item>
          <property name="text">
-          <string>200K</string>
+          <string>500</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>500K</string>
+          <string>1000</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>1M</string>
+          <string>1500</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>2M</string>
+          <string>2500</string>
          </property>
         </item>
         <item>
          <property name="text">
-          <string>5M</string>
+          <string>3500</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
+          <string>5000</string>
          </property>
         </item>
        </widget>

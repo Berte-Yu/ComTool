@@ -34,6 +34,15 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         # 发送按钮的槽函数
         self.pushButton_send.clicked.connect(self.sendButtonHandle)
 
+        # 连接接收缓存最大行
+        self.comboBox_rev_buff_size.currentIndexChanged.connect(self.setRevBuffSize)
+
+        # 清除接收区按钮
+        self.pushButton_rev_clear.clicked.connect(self.clearRx)
+
+        # 清除发送区按钮
+        self.pushButton_send_clear.clicked.connect(self.clearTx)
+
     def _init_param(self):
         # 初始化参数
         self.ComTool_status = {
@@ -54,7 +63,7 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
                 # 发送格式
                 'send_format' : 'ASCII',
                 # 接收区缓存大小
-                'recv_buff_size' : '200K',
+                'recv_buff_size' : '1000',
                 # 是否将接收的数据保存到文件
                 'is_recv_save_2_file' : False,
                 # 接收显示区的编码格式
@@ -68,29 +77,18 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
 
         self.com_dev_list = []
 
-        self._set_def_com_status()
-
         # 初始化一个定时器
         self.scan_uart_timer = QTimer()
 
-        self.__load_param_file()    
+        self.__load_param_file()
 
-        # 设置默认的接收和发送的格式
-        if self.ComTool_status['recv_format'] == 'ASCII':
-            self.radioButton_rev_ascii.setChecked(True)
-        else:
-            self.radioButton_rev_hex.setChecked(True)
-
-        if self.ComTool_status['send_format'] == 'ASCII':
-            self.radioButton_send_ascii.setChecked(True)
-        else:
-            self.radioButton_send_hex.setChecked(True)
-        
+        self._set_def_com_status()
 
         # 实例化一个字符转换类
         self.hex_handler = Hex_string.Hex_string()
 
-        self.plainTextEdit_rev.document()
+        # 设置接收区最大行数
+        self.plainTextEdit_rev.setMaximumBlockCount(int(self.ComTool_status['recv_buff_size']))
 
     def __load_param_file(self):
         # 加载参数文件
@@ -111,6 +109,29 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         self.comboBox_data_bits.setCurrentText(self.ComTool_status['data_bits'])
         self.comboBox_parity.setCurrentText(self.ComTool_status['parity'])
         self.comboBox_stop_bits.setCurrentText(self.ComTool_status['stop_bits'])
+
+        # 设置接收框的最大行数
+        self.comboBox_rev_buff_size.setCurrentText(self.ComTool_status['recv_buff_size'])
+
+        # 设置编码方式
+        self.comboBox_encode.setCurrentText(self.ComTool_status['encoding_format'])
+
+        # 设置默认的接收和发送的格式
+        if self.ComTool_status['recv_format'] == 'ASCII':
+            self.radioButton_rev_ascii.setChecked(True)
+        else:
+            self.radioButton_rev_hex.setChecked(True)
+
+        if self.ComTool_status['send_format'] == 'ASCII':
+            self.radioButton_send_ascii.setChecked(True)
+        else:
+            self.radioButton_send_hex.setChecked(True)
+
+        # 设置是否保存到文件的控件状态
+        if self.ComTool_status['is_recv_save_2_file'] == False:
+            self.checkBox_save_file.setChecked(False)
+        else:
+            self.checkBox_save_file.setChecked(True)
 
     def _get_current_com_status(self):
         # 获取当前界面设置的串口状态
@@ -178,10 +199,17 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
             # 设置连接状态
             self.ComTool_status['isConnect'] = True
 
+            # 将串口控件参数控件设置为只读
+            self.comboBox_Port.setDisabled(True)
+            self.comboBox_baud_rate.setDisabled(True)
+            self.comboBox_data_bits.setDisabled(True)
+            self.comboBox_parity.setDisabled(True)
+            self.comboBox_stop_bits.setDisabled(True)
+
             # 创建串口接收和发送的线程
-            self.thread_rx = Runthread.Runthread(self.com_dev.com_rxHandler)
-            self.thread_tx = Runthread.Runthread(self.com_dev.com_txHandler)
-            self.thread_rxData = Runthread.Runthread(self.rxDataHandler)
+            self.thread_rx = Runthread.Runthread(self.com_dev.com_rxHandler,name='rxHandler')
+            self.thread_tx = Runthread.Runthread(self.com_dev.com_txHandler,name='txHandler')
+            self.thread_rxData = Runthread.Runthread(self.rxDataHandler,name='rxdataHandler')
             self.thread_rxData.sendmsg.connect(self.display) # 将接收数据处理的线程信号连接到此处
             self.thread_rx.start()
             self.thread_tx.start()
@@ -191,10 +219,22 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
             self.thread_rx.stop()
             self.thread_tx.stop()
             self.thread_rxData.stop()
+
+            self.thread_rx.join()
+            self.thread_tx.join()
+            self.thread_rxData.join()
+
             self.thread_rxData.sendmsg.disconnect(self.display)
 
             # 关闭串口
             self.com_dev.close()
+
+            # 将串口控件参数控件设置为只读
+            self.comboBox_Port.setDisabled(False)
+            self.comboBox_baud_rate.setDisabled(False)
+            self.comboBox_data_bits.setDisabled(False)
+            self.comboBox_parity.setDisabled(False)
+            self.comboBox_stop_bits.setDisabled(False)
 
             # 设置定时器的间隔时间并启动定时器
             self.scan_uart_timer.start(500) 
@@ -213,7 +253,16 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
                     self.com_dev.write(sendtext.encode(encoding='utf-8'))
         pass
 
+    def setRevBuffSize(self):
+        self.ComTool_status['recv_buff_size'] = self.comboBox_rev_buff_size.currentText()
+        print('设置最大的显示行数'+self.ComTool_status['recv_buff_size'])
+        self.plainTextEdit_rev.setMaximumBlockCount(int(self.ComTool_status['recv_buff_size']))
         
+    def clearRx(self):
+        self.plainTextEdit_rev.clear()
+
+    def clearTx(self):
+        self.textEdit_send.clear()
 
     def rxDataHandler(self,sendmsg = None):
         # 从接收缓存中获取数据进行处理
@@ -222,7 +271,7 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         # 从接收缓存中读空数据
         while not self.com_dev.rx_queue.empty():
             rx_data.append(self.com_dev.rx_queue.get_nowait())
-        
+
         if len(rx_data) != 0:
             if self.radioButton_rev_hex.isChecked():
                 display_str = ''
@@ -253,7 +302,7 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
             self.connecthandle()
 
         with open(self.param_file_path,'w',encoding='utf-8') as f:
-            f.write(json.dumps(self.ComTool_status, indent=4)) 
+            f.write(json.dumps(self.ComTool_status, indent=4))
             f.close()
         return super().closeEvent(cls)
 
