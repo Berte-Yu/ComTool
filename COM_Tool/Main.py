@@ -12,6 +12,7 @@ import Hex_string
 import os
 import time
 import json
+import datetime
 
 class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWindow):
     def __init__(self, parent=None):
@@ -43,6 +44,9 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         # 清除发送区按钮
         self.pushButton_send_clear.clicked.connect(self.clearTx)
 
+        # 设置保存文件的信号
+        self.checkBox_save_file.stateChanged.connect(self.save_file)
+
     def _init_param(self):
         # 初始化参数
         self.ComTool_status = {
@@ -73,6 +77,8 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         # 加载配置文件的路径
         self.param_file_path = os.path.join(os.path.abspath('.'), 'data', 'param.dat')
 
+        self.recv_file_path = os.path.join(os.path.abspath('.'),'RecvFile')
+
         self.com_dev = com.com()
 
         self.com_dev_list = []
@@ -89,6 +95,9 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
 
         # 设置接收区最大行数
         self.plainTextEdit_rev.setMaximumBlockCount(int(self.ComTool_status['recv_buff_size']))
+
+        # 保存文件句柄
+        self.RecvDataFile = None
 
     def __load_param_file(self):
         # 加载参数文件
@@ -264,6 +273,21 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
     def clearTx(self):
         self.textEdit_send.clear()
 
+    def save_file(self):
+        if self.checkBox_save_file.isChecked():
+            if self.RecvDataFile != None:
+                self.RecvDataFile.close()
+                self.RecvDataFile = None
+
+            file_path = os.path.join(self.recv_file_path,datetime.datetime.now().strftime('%Y-%m-%d-%H-%M-%S'))+'.DAT'
+            print(file_path)
+            self.RecvDataFile = open(file_path,'a',encoding='utf-8')
+            QtWidgets.QMessageBox.information(self,'文件保存路径','之后接收到的数据都将保存在'+file_path+' !')
+        else:
+            if self.RecvDataFile != None:
+                self.RecvDataFile.close()
+                self.RecvDataFile = None
+
     def rxDataHandler(self,sendmsg = None):
         # 从接收缓存中获取数据进行处理
         rx_data = []
@@ -294,6 +318,8 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
 
     def display(self, msg):
         self.plainTextEdit_rev.insertPlainText(msg)
+        if self.RecvDataFile != None:
+            self.RecvDataFile.write(msg)
         self.plainTextEdit_rev.moveCursor(self.plainTextEdit_rev.textCursor().End)
 
     def closeEvent(self, cls):
@@ -301,6 +327,10 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         if self.ComTool_status['isConnect'] is True:
             self.connecthandle()
 
+        if self.RecvDataFile != None:
+            self.RecvDataFile.close()
+            self.RecvDataFile = None
+        
         with open(self.param_file_path,'w',encoding='utf-8') as f:
             f.write(json.dumps(self.ComTool_status, indent=4))
             f.close()
