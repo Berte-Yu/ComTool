@@ -29,6 +29,9 @@ class Hex_string():
 
         return utf8String
 
+    def str2Hex(self,str_):
+        return bytes.fromhex(str_)
+
 if __name__ == "__main__":
     a = Hex_string()
     b = bytes('haha',encoding='utf-8')

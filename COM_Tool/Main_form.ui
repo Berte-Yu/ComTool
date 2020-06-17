@@ -328,29 +328,22 @@
       <rect>
        <x>11</x>
        <y>24</y>
-       <width>151</width>
+       <width>154</width>
        <height>111</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout_2">
-      <item row="0" column="0">
-       <widget class="QRadioButton" name="radioButton_rev_ascii">
+      <item row="2" column="0" colspan="2">
+       <widget class="QCheckBox" name="checkBox_save_file">
         <property name="text">
-         <string>ASCII</string>
+         <string>接收数据到文件</string>
         </property>
        </widget>
       </item>
-      <item row="0" column="1">
-       <widget class="QRadioButton" name="radioButton_rev_hex">
+      <item row="3" column="1">
+       <widget class="QPushButton" name="pushButton_rev_clear">
         <property name="text">
-         <string>HEX</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="0">
-       <widget class="QLabel" name="label_6">
-        <property name="text">
-         <string>接收区行数</string>
+         <string>清除接收区</string>
         </property>
        </widget>
       </item>
@@ -388,10 +381,10 @@
         </item>
        </widget>
       </item>
-      <item row="2" column="0" colspan="2">
-       <widget class="QCheckBox" name="checkBox_save_file">
+      <item row="1" column="0">
+       <widget class="QLabel" name="label_6">
         <property name="text">
-         <string>接收数据到文件</string>
+         <string>接收区行数</string>
         </property>
        </widget>
       </item>
@@ -408,10 +401,10 @@
         </property>
        </spacer>
       </item>
-      <item row="3" column="1">
-       <widget class="QPushButton" name="pushButton_rev_clear">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="checkBox_recv_hex">
         <property name="text">
-         <string>清除接收区</string>
+         <string>HEX显示</string>
         </property>
        </widget>
       </item>
@@ -435,22 +428,15 @@
       <rect>
        <x>11</x>
        <y>22</y>
-       <width>151</width>
+       <width>154</width>
        <height>51</height>
       </rect>
      </property>
      <layout class="QGridLayout" name="gridLayout_5">
-      <item row="0" column="0">
-       <widget class="QRadioButton" name="radioButton_send_ascii">
+      <item row="1" column="1">
+       <widget class="QPushButton" name="pushButton_send_clear">
         <property name="text">
-         <string>ASCII</string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="1">
-       <widget class="QRadioButton" name="radioButton_send_hex">
-        <property name="text">
-         <string>HEX</string>
+         <string>清除发送区</string>
         </property>
        </widget>
       </item>
@@ -467,10 +453,10 @@
         </property>
        </spacer>
       </item>
-      <item row="1" column="1">
-       <widget class="QPushButton" name="pushButton_send_clear">
+      <item row="0" column="0">
+       <widget class="QCheckBox" name="checkBox_send_hex">
         <property name="text">
-         <string>清除发送区</string>
+         <string>HEX发送</string>
         </property>
        </widget>
       </item>
@@ -639,4 +625,8 @@
  </widget>
  <resources/>
  <connections/>
+ <buttongroups>
+  <buttongroup name="buttonGroup"/>
+  <buttongroup name="buttonGroup_2"/>
+ </buttongroups>
 </ui>

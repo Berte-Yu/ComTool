@@ -47,6 +47,9 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         # 设置保存文件的信号
         self.checkBox_save_file.stateChanged.connect(self.save_file)
 
+        # 设置发送模式的信号
+        self.checkBox_send_hex.toggled.connect(self.send_mode)
+
     def _init_param(self):
         # 初始化参数
         self.ComTool_status = {
@@ -127,14 +130,14 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
 
         # 设置默认的接收和发送的格式
         if self.ComTool_status['recv_format'] == 'ASCII':
-            self.radioButton_rev_ascii.setChecked(True)
+            self.checkBox_recv_hex.setChecked(False)
         else:
-            self.radioButton_rev_hex.setChecked(True)
+            self.checkBox_recv_hex.setChecked(True)
 
         if self.ComTool_status['send_format'] == 'ASCII':
-            self.radioButton_send_ascii.setChecked(True)
+            self.checkBox_send_hex.setChecked(False)
         else:
-            self.radioButton_send_hex.setChecked(True)
+            self.checkBox_send_hex.setChecked(True)
 
         # 设置是否保存到文件的控件状态
         if self.ComTool_status['is_recv_save_2_file'] == False:
@@ -257,10 +260,43 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         sendtext = self.textEdit_send.toPlainText()
 
         if len(sendtext) != 0:
-            if self.radioButton_send_ascii.isChecked():
+            if self.checkBox_send_hex.isChecked()==False:
                 if self.comboBox_encode.currentText() == 'UTF-8':
                     self.com_dev.write(sendtext.encode(encoding='utf-8'))
-        pass
+            else:
+                # 以HEX方式发送
+                try:
+                    byte_str = self.hex_handler.str2Hex(sendtext)
+                    self.com_dev.write(byte_str)
+                except:
+                    QtWidgets.QMessageBox.warning(self,'Hex：','输入非法！')
+                
+    def send_mode(self):
+        sendtext = self.textEdit_send.toPlainText()
+        if len(sendtext) == 0:
+            return
+
+        if self.checkBox_send_hex.isChecked() == False:
+            # hex-->str    
+            try:
+                t = []
+                b = self.hex_handler.str2Hex(sendtext)
+                t.append(b)
+                s = self.hex_handler.byte_to_utf8str(t)
+                self.textEdit_send.setPlainText(s)
+            except:
+                QtWidgets.QMessageBox.warning(self,'Hex：','输入非法！')
+                self.checkBox_send_hex.setChecked(True)
+
+        else:
+            # str --> hex
+            bytestr = []
+            display_str = ''
+            bytestr.append(sendtext.encode(encoding='utf-8'))
+            str_hex = self.hex_handler.byte_to_hexString(bytestr)
+            for s in str_hex:
+                display_str += s+' '
+            self.textEdit_send.setPlainText(display_str)
 
     def setRevBuffSize(self):
         self.ComTool_status['recv_buff_size'] = self.comboBox_rev_buff_size.currentText()
@@ -297,7 +333,7 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
             rx_data.append(self.com_dev.rx_queue.get_nowait())
 
         if len(rx_data) != 0:
-            if self.radioButton_rev_hex.isChecked():
+            if self.checkBox_recv_hex.isChecked():
                 display_str = ''
                 # 将接收到的数据按照hex格式显示
                 hex_rx_data = self.hex_handler.byte_to_hexString(rx_data)
