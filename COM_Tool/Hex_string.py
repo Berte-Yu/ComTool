@@ -16,18 +16,19 @@ class Hex_string():
 
         return hexString
 
-    def byte_to_utf8str(self, byte):
-        utf8String = ""
+    def byte_to_string(self, byte, encoding):
+        uString = ""
         if len(byte) == 0:
-            return utf8String
+            return uString
 
         bytestr = b''.join(byte)
         try:
-            utf8String = bytestr.decode(encoding='utf-8')
+            uString = bytestr.decode(encoding=encoding)
         except:
-            utf8String += '*'*len(bytestr)
+            uString += '*'*len(bytestr)
 
-        return utf8String
+        return uString
+
 
     def str2Hex(self,str_):
         return bytes.fromhex(str_)

@@ -9,5 +9,5 @@
     "send_format": "ASCII",
     "recv_buff_size": "500",
     "is_recv_save_2_file": false,
-    "encoding_format": "UTF-8"
+    "encoding_format": "ASCII"
 }

@@ -509,6 +509,11 @@
        <widget class="QComboBox" name="comboBox_encode">
         <item>
          <property name="text">
+          <string>ASCII</string>
+         </property>
+        </item>
+        <item>
+         <property name="text">
           <string>UTF-8</string>
          </property>
         </item>
@@ -625,8 +630,4 @@
  </widget>
  <resources/>
  <connections/>
- <buttongroups>
-  <buttongroup name="buttonGroup"/>
-  <buttongroup name="buttonGroup_2"/>
- </buttongroups>
 </ui>

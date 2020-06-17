@@ -50,6 +50,9 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         # 设置发送模式的信号
         self.checkBox_send_hex.toggled.connect(self.send_mode)
 
+        # 设置编码方式的信号
+        self.comboBox_encode.currentIndexChanged.connect(self.changeEncode)
+
     def _init_param(self):
         # 初始化参数
         self.ComTool_status = {
@@ -74,7 +77,7 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
                 # 是否将接收的数据保存到文件
                 'is_recv_save_2_file' : False,
                 # 接收显示区的编码格式
-                'encoding_format' : 'UTF-8',
+                'encoding_format' : 'ASCII',
             }
 
         # 加载配置文件的路径
@@ -263,6 +266,12 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
             if self.checkBox_send_hex.isChecked()==False:
                 if self.comboBox_encode.currentText() == 'UTF-8':
                     self.com_dev.write(sendtext.encode(encoding='utf-8'))
+                elif self.comboBox_encode.currentText() == 'ASCII':
+                    self.com_dev.write(sendtext.encode(encoding='ascii'))
+                elif self.comboBox_encode.currentText() == 'GB2312':
+                    self.com_dev.write(sendtext.encode(encoding='gb2312'))
+                elif self.comboBox_encode.currentText() == 'GDK':
+                    self.com_dev.write(sendtext.encode(encoding='gdk'))
             else:
                 # 以HEX方式发送
                 try:
@@ -282,17 +291,42 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
                 t = []
                 b = self.hex_handler.str2Hex(sendtext)
                 t.append(b)
-                s = self.hex_handler.byte_to_utf8str(t)
+                if self.comboBox_encode.currentText() == 'UTF-8':
+                    s = self.hex_handler.byte_to_string(t,'utf-8')
+                elif self.comboBox_encode.currentText() == 'ASCII':
+                    s = self.hex_handler.byte_to_string(t,'ascii')
+                elif self.comboBox_encode.currentText() == 'GB2312':
+                    s = self.hex_handler.byte_to_string(t,'gb2312')
+                elif self.comboBox_encode.currentText() == 'GDK':
+                    s = self.hex_handler.byte_to_string(t,'gdk')
+                
                 self.textEdit_send.setPlainText(s)
             except:
                 QtWidgets.QMessageBox.warning(self,'Hex：','输入非法！')
+                self.checkBox_send_hex.toggled.disconnect(self.send_mode)
                 self.checkBox_send_hex.setChecked(True)
-
+                self.checkBox_send_hex.toggled.connect(self.send_mode)
         else:
             # str --> hex
             bytestr = []
             display_str = ''
-            bytestr.append(sendtext.encode(encoding='utf-8'))
+
+            try:
+                if self.comboBox_encode.currentText() == 'UTF-8':
+                    bytestr.append(sendtext.encode(encoding='utf-8'))
+                elif self.comboBox_encode.currentText() == 'ASCII':
+                    bytestr.append(sendtext.encode(encoding='ascii'))
+                elif self.comboBox_encode.currentText() == 'GB2312':
+                    bytestr.append(sendtext.encode(encoding='gb2312'))
+                elif self.comboBox_encode.currentText() == 'GDK':
+                    bytestr.append(sendtext.encode(encoding='gdk'))
+            except:
+                QtWidgets.QMessageBox.warning(self,'String：','无法以当前编码方式解码，请修改编码方式！')
+                self.checkBox_send_hex.toggled.disconnect(self.send_mode)
+                self.checkBox_send_hex.setChecked(False)
+                self.checkBox_send_hex.toggled.connect(self.send_mode)
+                return
+
             str_hex = self.hex_handler.byte_to_hexString(bytestr)
             for s in str_hex:
                 display_str += s+' '
@@ -308,6 +342,9 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
 
     def clearTx(self):
         self.textEdit_send.clear()
+
+    def changeEncode(self):
+        self.ComTool_status['encoding_format'] = self.comboBox_encode.currentText()
 
     def save_file(self):
         if self.checkBox_save_file.isChecked():
@@ -346,9 +383,17 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
             else:
                 # 将接收的数据以ascii字符串的形式保存
                 if self.comboBox_encode.currentText() == 'UTF-8':
-                    utf8_rx_data = self.hex_handler.byte_to_utf8str(rx_data)
+                    utf8_rx_data = self.hex_handler.byte_to_string(rx_data,'utf-8')
                     sendmsg.emit(utf8_rx_data) # 将数据发送到显示函数中进行显示
-
+                elif self.comboBox_encode.currentText() == 'ASCII':
+                    ascii_rx_data = self.hex_handler.byte_to_string(rx_data,'ascii')
+                    sendmsg.emit(ascii_rx_data) # 将数据发送到显示函数中进行显示
+                elif self.comboBox_encode.currentText() == 'GB2312':
+                    gb2312_rx_data = self.hex_handler.byte_to_string(rx_data, 'gb2312')
+                    sendmsg.emit(gb2312_rx_data) # 将数据发送到显示函数中进行显示
+                elif self.comboBox_encode.currentText() == 'GDK':
+                    gdk_rx_data = self.hex_handler.byte_to_string(rx_data, 'gdk')
+                    sendmsg.emit(gdk_rx_data) # 将数据发送到显示函数中进行显示
         else:
             time.sleep(0.08)
 
