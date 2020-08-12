@@ -232,18 +232,24 @@ class Ui_MainWindow(object):
         self.menubar = QtWidgets.QMenuBar(MainWindow)
         self.menubar.setGeometry(QtCore.QRect(0, 0, 720, 23))
         self.menubar.setObjectName("menubar")
+        self.menu = QtWidgets.QMenu(self.menubar)
+        self.menu.setObjectName("menu")
         MainWindow.setMenuBar(self.menubar)
         self.statusbar = QtWidgets.QStatusBar(MainWindow)
         self.statusbar.setSizeGripEnabled(True)
         self.statusbar.setObjectName("statusbar")
         MainWindow.setStatusBar(self.statusbar)
+        self.tool_mult_string_send = QtWidgets.QAction(MainWindow)
+        self.tool_mult_string_send.setObjectName("tool_mult_string_send")
+        self.menu.addAction(self.tool_mult_string_send)
+        self.menubar.addAction(self.menu.menuAction())
 
         self.retranslateUi(MainWindow)
         QtCore.QMetaObject.connectSlotsByName(MainWindow)
 
     def retranslateUi(self, MainWindow):
         _translate = QtCore.QCoreApplication.translate
-        MainWindow.setWindowTitle(_translate("MainWindow", "MainWindow"))
+        MainWindow.setWindowTitle(_translate("MainWindow", "串口助手"))
         self.groupBox.setTitle(_translate("MainWindow", "串口设置"))
         self.label_5.setText(_translate("MainWindow", "停止位"))
         self.comboBox_parity.setItemText(0, _translate("MainWindow", "None"))
@@ -303,4 +309,6 @@ class Ui_MainWindow(object):
         self.comboBox_encode.setItemText(3, _translate("MainWindow", "GDK"))
         self.groupBox_5.setTitle(_translate("MainWindow", "发送"))
         self.pushButton_send.setText(_translate("MainWindow", "发送"))
+        self.menu.setTitle(_translate("MainWindow", "工具"))
+        self.tool_mult_string_send.setText(_translate("MainWindow", "多字符串发送"))
 

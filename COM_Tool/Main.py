@@ -53,6 +53,9 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
         # 设置编码方式的信号
         self.comboBox_encode.currentIndexChanged.connect(self.changeEncode)
 
+        self.tool_mult_string_send.triggered.connect(self.multi_string_send)
+
+
     def _init_param(self):
         # 初始化参数
         self.ComTool_status = {
@@ -416,6 +419,9 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
             f.write(json.dumps(self.ComTool_status, indent=4))
             f.close()
         return super().closeEvent(cls)
+
+    def multi_string_send(self):
+        print('菜单栏被点击')
 
 def mywindow():
     mywindow = Main_form_UI()
