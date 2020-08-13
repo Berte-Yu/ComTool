@@ -306,7 +306,7 @@ class Ui_MainWindow(object):
         self.comboBox_encode.setItemText(0, _translate("MainWindow", "ASCII"))
         self.comboBox_encode.setItemText(1, _translate("MainWindow", "UTF-8"))
         self.comboBox_encode.setItemText(2, _translate("MainWindow", "GB2312"))
-        self.comboBox_encode.setItemText(3, _translate("MainWindow", "GDK"))
+        self.comboBox_encode.setItemText(3, _translate("MainWindow", "GBK"))
         self.groupBox_5.setTitle(_translate("MainWindow", "发送"))
         self.pushButton_send.setText(_translate("MainWindow", "发送"))
         self.menu.setTitle(_translate("MainWindow", "工具"))

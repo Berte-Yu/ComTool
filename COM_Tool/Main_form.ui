@@ -524,7 +524,7 @@
         </item>
         <item>
          <property name="text">
-          <string>GDK</string>
+          <string>GBK</string>
          </property>
         </item>
        </widget>
