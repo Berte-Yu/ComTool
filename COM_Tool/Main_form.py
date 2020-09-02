@@ -2,11 +2,13 @@
 
 # Form implementation generated from reading ui file 'Main_form.ui'
 #
-# Created by: PyQt5 UI code generator 5.11.3
+# Created by: PyQt5 UI code generator 5.13.0
 #
 # WARNING! All changes made in this file will be lost!
 
+
 from PyQt5 import QtCore, QtGui, QtWidgets
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -193,7 +195,6 @@ class Ui_MainWindow(object):
         self.comboBox_encode.addItem("")
         self.comboBox_encode.addItem("")
         self.comboBox_encode.addItem("")
-        self.comboBox_encode.addItem("")
         self.gridLayout_3.addWidget(self.comboBox_encode, 0, 1, 1, 1)
         self.gridLayout_3.setColumnStretch(0, 2)
         self.gridLayout_3.setColumnStretch(1, 3)
@@ -305,10 +306,8 @@ class Ui_MainWindow(object):
         self.label_7.setText(_translate("MainWindow", "编码格式"))
         self.comboBox_encode.setItemText(0, _translate("MainWindow", "ASCII"))
         self.comboBox_encode.setItemText(1, _translate("MainWindow", "UTF-8"))
-        self.comboBox_encode.setItemText(2, _translate("MainWindow", "GB2312"))
-        self.comboBox_encode.setItemText(3, _translate("MainWindow", "GBK"))
+        self.comboBox_encode.setItemText(2, _translate("MainWindow", "GBK"))
         self.groupBox_5.setTitle(_translate("MainWindow", "发送"))
         self.pushButton_send.setText(_translate("MainWindow", "发送"))
         self.menu.setTitle(_translate("MainWindow", "工具"))
         self.tool_mult_string_send.setText(_translate("MainWindow", "多字符串发送"))
-

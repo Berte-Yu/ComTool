@@ -519,11 +519,6 @@
         </item>
         <item>
          <property name="text">
-          <string>GB2312</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
           <string>GBK</string>
          </property>
         </item>
