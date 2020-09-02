@@ -365,12 +365,15 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
     def rxDataHandler(self,sendmsg = None):
         # 从接收缓存中获取数据进行处理
         rx_data = []
+        
 
-        # 从接收缓存中读空数据
+        '''
+        # 队列中有值
         while not self.com_dev.rx_queue.empty():
             rx_data.append(self.com_dev.rx_queue.get_nowait())
 
         if len(rx_data) != 0:
+
             if self.checkBox_recv_hex.isChecked():
                 display_str = ''
                 # 将接收到的数据按照hex格式显示
@@ -394,6 +397,8 @@ class Main_form_UI(QtWidgets.QMainWindow, QtWidgets.QWidget, Main_form.Ui_MainWi
                     sendmsg.emit(gdk_rx_data) # 将数据发送到显示函数中进行显示
         else:
             time.sleep(0.08)
+
+        '''
 
     def display(self, msg):
         self.plainTextEdit_rev.insertPlainText(msg)

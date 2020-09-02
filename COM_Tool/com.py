@@ -50,17 +50,24 @@ class com(object):
             time.sleep(0.05)
 
     def com_rxHandler(self,sendmsg=None):
-        read_num = self.dev.in_waiting
-        if read_num == 0:
-            time.sleep(0.05)
-            return
+        data = {"time":0,"data":None}
 
         try:
-            read_data = self.dev.read(read_num)
-        except:
+            # 将当前读到的数据加入时间戳
+            data["data"] = self.dev.read(1)
+            data["time"] = time.time()
+        except serial.SerialException:
+            print("串口接收出错")
             return
-        
-        self.rx_queue.put_nowait(read_data)
+        except serial.SerialTimeoutException:
+            return
+
+        # 将读到的数据入队
+        try:
+            self.rx_queue.put(data, timeout=2)
+        except:
+            print("串口入队超时")
+            return
 
     def write(self, data):
         # date是byte类型的列表
