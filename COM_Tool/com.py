@@ -50,17 +50,36 @@ class com(object):
             time.sleep(0.05)
 
     def com_rxHandler(self,sendmsg=None):
-        read_num = self.dev.in_waiting
-        if read_num == 0:
-            time.sleep(0.05)
-            return
+        # 接收一个字节，将数据存入队列
+        read_data_struct = {"time" : None,"byte":None}
 
         try:
-            read_data = self.dev.read(read_num)
-        except:
+            read_data_struct['byte'] = self.dev.read(1)
+        except serial.SerialTimeoutException:
             return
+        except serial.SerialException:
+            print("串口read 异常")
+            return
+
+        read_data_struct['time'] = time.time()
+
+        try:
+            self.rx_queue.put(read_data_struct,timeout=0.5)
+        except:
+            print("串口接收队列满 异常")
+            return
+
+        # read_num = self.dev.in_waiting
+        # if read_num == 0:
+        #     time.sleep(0.05)
+        #     return
+
+        # try:
+        #     read_data = self.dev.read(read_num)
+        # except:
+        #     return
         
-        self.rx_queue.put_nowait(read_data)
+        # self.rx_queue.put_nowait(read_data)
 
     def write(self, data):
         # date是byte类型的列表
